@@ -56,3 +56,39 @@ void setup() {
     delay(2000);
 }
 
+/**
+ * @brief Arduino loop hook.
+ *
+ * Reads DHT11 temperature and humidity at a 2-second interval and
+ * updates the OLED. If a sensor read fails, a brief error is shown.
+ */
+void loop() {
+
+    delay(2000);   // VERY IMPORTANT for DHT11
+
+    float temp = dht.readTemperature();
+    float hum = dht.readHumidity();
+
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0,0);
+
+    if (isnan(temp) || isnan(hum)) {
+        display.println("Sensor Error!");
+        display.display();
+        return;
+    }
+
+    display.println("DHT11 Reading");
+    display.println("----------------");
+
+    display.print("Temp: ");
+    display.print(temp);
+    display.println(" C");
+
+    display.print("Humidity: ");
+    display.print(hum);
+    display.println(" %");
+
+    display.display();   // MUST be at end
+}
