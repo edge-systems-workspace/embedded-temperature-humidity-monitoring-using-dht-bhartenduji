@@ -37,3 +37,22 @@ DHT dht(DHTPIN, DHTTYPE);
  * Initializes serial logging, the DHT sensor, and the SSD1306 OLED.
  * Displays a short splash screen and halts if the OLED is not detected.
  */
+void setup() {
+    Serial.begin(9600);
+    dht.begin();
+
+    // Initialize OLED
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println("OLED not found");
+        while (1);
+    }
+
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0,0);
+    display.println("DHT11 Sensor");
+    display.display();
+    delay(2000);
+}
+
