@@ -30,3 +30,10 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define DHTTYPE DHT11   // Changed to DHT11
 /** @brief DHT sensor instance. */
 DHT dht(DHTPIN, DHTTYPE);
+
+/**
+ * @brief Arduino setup hook.
+ *
+ * Initializes serial logging, the DHT sensor, and the SSD1306 OLED.
+ * Displays a short splash screen and halts if the OLED is not detected.
+ */
