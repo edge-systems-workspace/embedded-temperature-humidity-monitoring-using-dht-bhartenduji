@@ -1,54 +1,94 @@
-#include <Arduino.h>
 /**
- * @file main.ino
- * @brief Embedded Temperature and Humidity Monitoring using DHT11
- * @author YOUR_NAME
- * @date YYYY-MM-DD
+ * @file main.cpp
+ * @brief Reads DHT11 temperature/humidity and displays values on an SSD1306 OLED.
  *
- * @details
- * This program reads environmental data from the DHT11 sensor
- * and displays temperature and humidity values on Serial Monitor.
- * Students must complete the TODO sections.
+ * Wiring assumptions:
+ * - DHT11 data pin on Arduino digital pin 2 (DHTPIN).
+ * - SSD1306 OLED on I2C address 0x3C.
+ *
+ * Timing assumptions:
+ * - DHT11 requires ~2s between reads (enforced in loop).
  */
-
+#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <DHT.h>
 
-// TODO 1:
-// Define the DHT data pin (Use digital pin 2)
+/** @brief OLED width in pixels. */
+#define SCREEN_WIDTH 128
+/** @brief OLED height in pixels. */
+#define SCREEN_HEIGHT 64
+/** @brief OLED reset pin; -1 uses shared reset (no dedicated pin). */
+#define OLED_RESET -1
+/** @brief SSD1306 display instance on the default I2C bus. */
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// TODO 2:
-// Define the DHT sensor type (DHT11)
+/** @brief DHT11 data pin (Arduino digital pin 2). */
+#define DHTPIN 2
+/** @brief DHT sensor type (DHT11). */
+#define DHTTYPE DHT11   // Changed to DHT11
+/** @brief DHT sensor instance. */
+DHT dht(DHTPIN, DHTTYPE);
 
-// TODO 3:
-// Create a DHT object using the defined pin and sensor type
-
+/**
+ * @brief Arduino setup hook.
+ *
+ * Initializes serial logging, the DHT sensor, and the SSD1306 OLED.
+ * Displays a short splash screen and halts if the OLED is not detected.
+ */
 void setup() {
+    Serial.begin(9600);
+    dht.begin();
 
-    // TODO 4:
-    // Initialize Serial communication (9600 baud rate)
+    // Initialize OLED
+    if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println("OLED not found");
+        while (1);
+    }
 
-    // TODO 5:
-    // Initialize the DHT sensor
-
-    // TODO 6:
-    // Print a system initialization message
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0,0);
+    display.println("DHT11 Sensor");
+    display.display();
+    delay(2000);
 }
 
+/**
+ * @brief Arduino loop hook.
+ *
+ * Reads DHT11 temperature and humidity at a 2-second interval and
+ * updates the OLED. If a sensor read fails, a brief error is shown.
+ */
 void loop() {
 
-    // TODO 7:
-    // Read humidity value from sensor
+    delay(2000);   // VERY IMPORTANT for DHT11
 
-    // TODO 8:
-    // Read temperature value from sensor
+    float temp = dht.readTemperature();
+    float hum = dht.readHumidity();
 
-    // TODO 9:
-    // Check if either reading failed using isnan()
-    // If failed, print error message and return
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setCursor(0,0);
 
-    // TODO 10:
-    // Print formatted temperature and humidity values
+    if (isnan(temp) || isnan(hum)) {
+        display.println("Sensor Error!");
+        display.display();
+        return;
+    }
 
-    // TODO 11:
-    // Add a 2-second delay before next reading
+    display.println("DHT11 Reading");
+    display.println("----------------");
+
+    display.print("Temp: ");
+    display.print(temp);
+    display.println(" C");
+
+    display.print("Humidity: ");
+    display.print(hum);
+    display.println(" %");
+
+    display.display();   // MUST be at end
 }
